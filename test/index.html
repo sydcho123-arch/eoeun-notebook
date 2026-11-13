@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>저장 진단</title>
+<style>body{font:16px/1.6 -apple-system,sans-serif;margin:0;padding:18px;background:#fff;color:#222}h1{font-size:20px}.r{padding:10px 12px;border-radius:10px;margin:8px 0;background:#f2f4f7}.ok{background:#e6f6ea}.no{background:#fde8e8}b{display:block}small{color:#555}button{font:inherit;padding:10px 14px;border-radius:10px;border:1.5px solid #3b6;background:#fff;margin-top:10px}</style></head><body>
+<h1>💾 저장 진단</h1>
+<p>이 화면을 <b style="display:inline">열고 → 완전히 나갔다가 → 다시 열어</b> 보세요. 방문 횟수가 올라가면 저장이 되는 것이고, 매번 1이면 지워지는 것입니다.</p>
+<div id="o"></div><button onclick="location.reload()">🔄 새로고침</button>
+<script>
+var o=document.getElementById('o');function add(t,ok,d){var e=document.createElement('div');e.className='r '+(ok===true?'ok':ok===false?'no':'');e.innerHTML='<b>'+t+'</b><small>'+(d||'')+'</small>';o.appendChild(e)}
+(function(){
+ var n=0;try{n=(+localStorage.getItem('dg_n')||0)+1;localStorage.setItem('dg_n',n);add('localStorage 방문 횟수: '+n,n>1,n>1?'지난 방문 기록이 남아 있어요':'처음이거나, 지난 기록이 지워졌어요');var f=localStorage.getItem('dg_first');if(!f){f=new Date().toLocaleString();localStorage.setItem('dg_first',f)}add('처음 방문 시각',null,f)}catch(e){add('localStorage 사용 불가',false,String(e))}
+ try{var s=+sessionStorage.getItem('dg_s')||0;sessionStorage.setItem('dg_s',s+1);add('sessionStorage 횟수: '+(s+1),null,'(탭을 닫으면 사라지는 저장소)')}catch(e){add('sessionStorage 사용 불가',false,String(e))}
+ try{document.cookie='dg_c='+Date.now()+';max-age=31536000;path=/;SameSite=None;Secure';add('쿠키',document.cookie.indexOf('dg_c')>=0,document.cookie.indexOf('dg_c')>=0?'쓰기 가능':'막힘')}catch(e){add('쿠키 사용 불가',false,String(e))}
+ try{var r=indexedDB.open('dg',1);r.onupgradeneeded=function(){r.result.createObjectStore('s')};r.onsuccess=function(){var db=r.result,g=db.transaction('s','readonly').objectStore('s').get('n');g.onsuccess=function(){var v=(g.result||0)+1;db.transaction('s','readwrite').objectStore('s').put(v,'n');add('IndexedDB 방문 횟수: '+v,v>1,'')}};r.onerror=function(){add('IndexedDB 막힘',false,String(r.error))}}catch(e){add('IndexedDB 사용 불가',false,String(e))}
+ try{if(navigator.storage&&navigator.storage.persist){navigator.storage.persisted().then(function(p){add('영구 저장 허용 상태',p,p?'허용됨':'허용 안 됨(폰이 지울 수 있음)')})}else add('영구 저장 요청 기능',false,'이 폰에서는 지원 안 함')}catch(e){}
+ add('주소(origin)',null,String(location.origin)+' · 상위 창과 같은 주소? '+(function(){try{return window.top===window?'예(단독)':'아니오(다른 화면 안에 들어 있음)'}catch(e){return '아니오(막힘)'}})());
+ add('브라우저',null,navigator.userAgent);
+})();
+</script></body></html>
